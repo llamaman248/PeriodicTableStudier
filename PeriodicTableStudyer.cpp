@@ -106,20 +106,39 @@ bool _myStrcmp(char* str1, char* str2)
 char input[50] = "";
 int elNum = -1;
 bool typing = false;
+bool randomMode = false;
+bool gotSymbol = false;
+bool gotName = false;
+
 const element elmnts[] = { {"H", "hydrogen"},       {"He", "helium"},
         {"Li", "lithium"}, {"Be", "beryllium"},         {"B", "boron"}, {"C", "carbon"}, {"N", "nitrogen"}, {"O", "oxygen"}, {"F", "fluorine"}, {"Ne", "neon"},
         {"Na", "sodium"}, {"Mg", "magnesium"},          {"Al", "aluminium"}, {"Si", "silicon"}, {"P", "phosphorus"}, {"S", "sulfur"}, {"Cl", "chlorine"}, {"Ar", "argon"},
         {"K", "potassium"}, {"Ca", "calcium"}, {"Sc", "scandium"}, {"Ti", "titanium"}, {"V", "vanadium"}, {"Cr", "chromium"}, {"Mn", "manganese"}, {"Fe", "iron"}, {"Co", "cobalt"}, {"Ni", "nickel"}, {"Cu", "copper"}, {"Zn", "zinc"}, {"Ga", "gallium"}, {"Ge", "germanium"}, {"As", "arsenic"}, {"Se", "selenium"}, {"Br", "bromine"}, {"Kr", "krypton"},
         {"Rb", "rubidium"}, {"Sr", "strontium"}, {"Y", "yttrium"}, {"Zr", "zirconium"}, {"Nb", "niobium"}, {"Mo", "molybdenum"}, {"Tc", "technetium"}, {"Ru", "ruthenium"}, {"Rh", "rhodium"}, {"Pd", "palladium"}, {"Ag", "silver"}, {"Cd", "cadmium"}, {"In", "indium"}, {"Sn", "tin"}, {"Sb", "antimony"}, {"Te", "tellurium"}, {"I", "iodine"}, {"Xe", "xenon"},
         {"Cs", "cesium"}, {"Ba", "barium"},
-        {"La", "lanthanum"}, {"Ce", "cerium"}, {"Pr", "praseodymium"}, {"Nd", "neodymium"}, {"Pm", "promethium"}, {"Sm", "samarium"}, {"Eu", "europium"}, {"Gd", "gadoliunium"}, {"Tb", "terbium"}, {"Dy", "dysprosium"}, {"Ho", "holmium"}, {"Er", "erbium"}, {"Tm", "thulium"}, {"Yb", "ytterbium"}, {"Lu", "lutetium"},
-        {"Hf", "hafnium"}, {"Ta", "tantalum"}, {"W", "tungsten"}, {"Re", "rhenium"}, {"Os", "osmium"}, {"Ir", "iridium"}, {"Pt", "platinum"}, {"Au", "gold"}, {"Hg", "mercury"}, {"Ti", "thallium"}, {"Pb", "lead"}, {"Bi", "bismuth"}, {"Po", "polonium"}, {"At", "astatine"}, {"Rn", "radon"},
+        {"La", "lanthanum"}, {"Ce", "cerium"}, {"Pr", "praseodymium"}, {"Nd", "neodymium"}, {"Pm", "promethium"}, {"Sm", "samarium"}, {"Eu", "europium"}, {"Gd", "gadolinium"}, {"Tb", "terbium"}, {"Dy", "dysprosium"}, {"Ho", "holmium"}, {"Er", "erbium"}, {"Tm", "thulium"}, {"Yb", "ytterbium"}, {"Lu", "lutetium"},
+        {"Hf", "hafnium"}, {"Ta", "tantalum"}, {"W", "tungsten"}, {"Re", "rhenium"}, {"Os", "osmium"}, {"Ir", "iridium"}, {"Pt", "platinum"}, {"Au", "gold"}, {"Hg", "mercury"}, {"Tl", "thallium"}, {"Pb", "lead"}, {"Bi", "bismuth"}, {"Po", "polonium"}, {"At", "astatine"}, {"Rn", "radon"},
         {"Fr", "francium"}, {"Ra", "radium"},
         {"Ac", "actinium"}, {"Th", "thorium"}, {"Pa", "protactinium"}, {"U", "uranium"}, {"Np", "neptunium"}, {"Pu", "plutonium"}, {"Am", "americium"}, {"Cm", "curium"}, {"Bk", "berkelium"}, {"Cf", "californium"}, {"Es", "einsteinium"}, {"Fm", "fermium"}};
 
 bool validId(size_t id)
 {
     return id < ((sizeof(elmnts) / sizeof(elmnts[0])));
+}
+
+
+
+void nextElement()
+{   
+    if (randomMode)
+    {
+        elNum = (double)rand() / RAND_MAX * (((sizeof(elmnts) / sizeof(elmnts[0]))) - 1);
+    }
+    else
+        elNum += 1;
+    
+    gotSymbol = false;
+    gotName = false;
 }
 
 bool singleCharComands(char c)
@@ -130,38 +149,53 @@ bool singleCharComands(char c)
         // Escape Char
     case '-':
         // Next element
+        
+        if (elNum + 1 >= 0)
+                std::cout << elNum + 2 << ' ' << elmnts[elNum + 1].symbol << ' ' << elmnts[elNum + 1].name << std::endl;
+
         if (validId(elNum + 1))
-            elNum += 1;
-        if (elNum >= 0)
-            std::cout << elNum + 1 << ' ' << elmnts[elNum].symbol << ' ' << elmnts[elNum].name << std::endl;
+        {
+            
+            nextElement();
+        }
         typing = false;
         return true;
     case '/':
-        // test
-        std::cout << "TEST ->Type: ";
-        std::cin >> input;
-        std::cout << toUpper(input);
-        typing = false;
+        // Activate/Deactivate random mode
+        randomMode = !randomMode;
+        if (randomMode)
+            std::cout << "\nRandom mode activated.\n";
+        else
+            std::cout << "\nRandom mode deactivated.\n";
         return true;
     default:
         return false;
     }
 }
 
+
 int main()
 {
-    bool gotSymbol = false;
-    bool gotName = false;
+    time_t tmStart = 0;
+    time(&tmStart);
+    srand(tmStart);
     while(!_myStrcmp(toLower(input), (char*)"exit"))
     {
+        if (!validId(elNum + 1))
+        {
+            std::cout << "\nYou finished the first 100!!! (The rest are not included in this)\n";
+            typing = false;
+            elNum = -1;
+        }
+
         if (!typing)
         {
             input[0] = _getch();
             if (singleCharComands(input[0]))
                 goto skipFullType;
         }
-        
-        std::cout << "\nType: ";
+
+        std::cout << "\nType element " << elNum + 2 << ": ";
     avoidDisplayType:
         
         typing = true;
@@ -198,9 +232,7 @@ int main()
             else
             {
                 std::cout << "You Got Element " << elNum + 2 << "!!\n";
-                elNum += 1;
-                gotSymbol = false;
-                gotName = false;
+                nextElement();
                 continue;
             }
         }
@@ -214,9 +246,7 @@ int main()
             else
             {
                 std::cout << "You Got Element " << elNum + 2 << "!!\n";
-                elNum += 1;
-                gotSymbol = false;
-                gotName = false;
+                nextElement();
                 continue;
             }
         }
